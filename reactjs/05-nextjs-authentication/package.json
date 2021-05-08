@@ -1,0 +1,22 @@
+{
+  "name": "05-nextjs-authentication",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "next": "10.2.0",
+    "nookies": "^2.5.2",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^15.0.2",
+    "@types/react": "^17.0.5",
+    "typescript": "^4.2.4"
+  }
+}
