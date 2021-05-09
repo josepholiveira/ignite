@@ -1,4 +1,3 @@
-import { GetServerSideProps } from 'next';
 import { FormEvent, useContext, useState } from 'react'
 import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/Home.module.css'
