@@ -1,14 +1,12 @@
 import { render, screen } from '@testing-library/react'
-import { getSession, useSession } from 'next-auth/client'
-import { useRouter } from 'next/router'
+import { getSession } from 'next-auth/client'
 import { mocked } from 'ts-jest/utils'
-import Post, { getStaticProps } from '../../pages/posts/preview/[slug]'
+import Post, { getServerSideProps } from '../../pages/posts/[slug]'
 
 import { getPrismicClient } from '../../services/prismic'
 
 jest.mock('next/router')
 jest.mock('next-auth/client')
-jest.mock('next/router')
 jest.mock('../../services/prismic')
 
 const post = { 
@@ -18,39 +16,43 @@ const post = {
   updatedAt: '10 de abril' 
 }
 
-describe('Post preview page', () => {
+describe('Post page', () => {
   it('renders correctly', () => {
-    const useSessionMocked = mocked(useSession)
-
-    useSessionMocked.mockReturnValueOnce([null, false]);
-
     render(<Post post={post} />)
 
-    expect(screen.getByText('Wanna continue reading?')).toBeInTheDocument()
     expect(screen.getByText('My New Post')).toBeInTheDocument()
     expect(screen.getByText('Post excerpt')).toBeInTheDocument()
   })
 
-  it('redirects user to full post when user is subscribed', async () => {
-    const useSessionMocked = mocked(useSession)
-    const useRouterMocked = mocked(useRouter)
-    const pushMock = jest.fn()
+  it('redirects user if no subscription is found', async () => {
+    const getSessionMocked = mocked(getSession);
 
-    useSessionMocked.mockReturnValueOnce([{
-      activeSubscription: 'fake-active-subscription'
-    }, false] as any);
-
-    useRouterMocked.mockReturnValueOnce({
-      push: pushMock
+    getSessionMocked.mockResolvedValueOnce({
+      activeSubscription: null
     } as any)
 
-    render(<Post post={post} />)
+    const response = await getServerSideProps({
+      params: {
+        slug: 'my-new-post'
+      }
+    } as any)
 
-    expect(pushMock).toHaveBeenCalledWith('/posts/my-new-post')
+    expect(response).toEqual(
+      expect.objectContaining({
+        redirect: expect.objectContaining({
+          destination: '/'
+        })
+      })
+    )
   })
 
   it('loads initial data', async () => {
+    const getSessionMocked = mocked(getSession);
     const getPrismicClientMocked = mocked(getPrismicClient)
+
+    getSessionMocked.mockResolvedValueOnce({
+      activeSubscription: 'fake-active-subscription'
+    } as any)
 
     getPrismicClientMocked.mockReturnValueOnce({
       getByUID: jest.fn().mockResolvedValueOnce({
@@ -66,11 +68,11 @@ describe('Post preview page', () => {
       })
     } as any)
 
-    const response = await getStaticProps({
+    const response = await getServerSideProps({
       params: {
         slug: 'my-new-post'
       }
-    })
+    } as any)
 
     expect(response).toEqual(
       expect.objectContaining({
