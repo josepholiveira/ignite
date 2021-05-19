@@ -9,7 +9,7 @@ import Link from 'next/link'
 
 type Post = {
   slug: string;
-  title: SVGStringList;
+  title: string;
   excerpt: string;
   updatedAt: string;
 }
